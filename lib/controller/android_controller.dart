@@ -1,7 +1,8 @@
+import 'package:cpu_z_copy/controller/battery_controller.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
-class AndroidController {
+abstract class AndroidController {
   static final _eventChannelName = 'com.example.spu_z_copy_event_channel';
   static final _methodCannelName = 'com.example.spu_z_copy_event_channel';
 
@@ -10,16 +11,17 @@ class AndroidController {
 
   Stream<int> getBattery() async* {
     _eventPlatform.receiveBroadcastStream().listen((event) {
-      StateController.battery.value = event as int;
+      print(event);
+      _batteryController. = event as int;
     });
   }
 }
 
 
 
-class StateController {
+extension StateController on AndroidController {
 
-  static ValueNotifier<int> battery = ValueNotifier(0);
+  static BatteryController _batteryController = BatteryController();
 
 
 }
