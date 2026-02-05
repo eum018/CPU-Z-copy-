@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:cpu_z_copy/controller/battery_controller.dart';
+import 'package:cpu_z_copy/controller/sensor_contollrer.dart';
 import 'package:cpu_z_copy/main.dart';
 import 'package:cpu_z_copy/widget/info_item.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +22,11 @@ class SOC extends StatelessWidget {
           InfoItem(title: 'Clock Speed', infos: ['dfagdsfg']),
           ...List.generate(
             8,
-            (index) => Padding(
-              padding: const EdgeInsets.only(left: 12),
-              child: InfoItem(title: 'CPU $index', infos: ['ddfg']),
-            ),
+                (index) =>
+                Padding(
+                  padding: const EdgeInsets.only(left: 12),
+                  child: InfoItem(title: 'CPU $index', infos: ['ddfg']),
+                ),
           ),
           InfoItem(title: 'GPU Load', infos: ['%']),
           InfoItem(title: 'Scaling Governor', infos: ['dfsgdf']),
@@ -103,19 +105,23 @@ class _BatteryState extends State<Battery> {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: _batteryController.updateCount,
-      builder: (context, value, child) {
-        return Column(
-          children: [
-            InfoItem(title: 'Health', infos: []),
-            InfoItem(title: 'Level', infos: ['${_batteryController.level}']),
-            InfoItem(title: 'Power Source', infos: []),
-            InfoItem(title: 'Technology', infos: []),
-            InfoItem(title: 'Temperature', infos: []),
-            InfoItem(title: 'Voltage', infos: []),
-          ],
-        );
-      }
+        valueListenable: _batteryController.updateCount,
+        builder: (context, value, child) {
+          return Column(
+            children: [
+              InfoItem(title: 'Health', infos: [_batteryController.health]),
+              InfoItem(title: 'Level', infos: ['${_batteryController.level}']),
+              InfoItem(title: 'Power Source',
+                  infos: [_batteryController.PowerSource]),
+              InfoItem(
+                  title: 'Technology', infos: [_batteryController.Technology]),
+              InfoItem(title: 'Temperature',
+                  infos: ['${_batteryController.Temperature}']),
+              InfoItem(
+                  title: 'Voltage', infos: ['${_batteryController.Voltage}']),
+            ],
+          );
+        }
     );
   }
 }
@@ -135,14 +141,44 @@ class Thermal extends StatelessWidget {
   }
 }
 
-class Sensors extends StatelessWidget {
+class Sensors extends StatefulWidget {
   const Sensors({super.key});
+
+  @override
+  State<Sensors> createState() => _SensorsState();
+}
+
+class _SensorsState extends State<Sensors> {
+
+  late SensorController _sensorController;
+
+
+  @override
+  void initState() {
+    _sensorController = SensorController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _sensorController.init();
+    },);
+
+
+    super.initState();
+  }
+
 
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
         children: [
+
+          ...List.generate(_sensorController.sensorList.length, (index) =>
+              SensorItem(
+                  title: _sensorController.sensorList[index], info: ''),),
+
+          SizedBox(height: 100,),
+
+
           SensorItem(title: 'LSM6DSO Accelerometer', info: ''),
           SensorItem(title: 'AK09918 Magnetometer', info: ''),
           SensorItem(title: 'LSM6DSO Gyroscope', info: ''),
