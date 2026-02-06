@@ -12,32 +12,35 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        _eventChannel = EventChannel(flutterEngine.dartExecutor.binaryMessenger, ChannelName.EVENT_CHANNEL_NAME)
-        _methodChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, ChannelName.METHOD_CHANNEL_NAME)
 
-        _eventChannel.setStreamHandler(Battery(context).batteryHandler)
+        EventChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            Channel.EVENT_CHANNEL_NAME.title + RequestApp.BATTERY.title
+        ).setStreamHandler(Battery(context).batteryHandler)
 
-        _methodChannel.setMethodCallHandler { call, result ->
-            val content = when(call.method){
-                MethodRequest.SENSOR_LIST -> Sensor(context).getSensorList()
-                else -> result.notImplemented()
-            }
-            result.success(content)
-        }
+        EventChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            Channel.EVENT_CHANNEL_NAME.title + RequestApp.SENSOR.title
+        ).setStreamHandler(Sensor(context).sensorHandler)
+
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            Channel.METHOD_CHANNEL_NAME.title + RequestApp.DEVICE.title
+        ).setMethodCallHandler(Device(context).handler)
+
+
     }
 
-    object MethodRequest {
-        const val BATTERY = "Battery"
-        const val THERMAL = "Thermal"
-        const val SENSOR_LIST = "Sensor_list"
-        const val SYSTEM = "System"
-        const val SOC = "Soc"
-        const val DEVICE = "Device"
+
+    enum class RequestApp(val title: String) {
+        BATTERY("_battery"), THERMAL("_thermal"), SENSOR("_sensor"), SYSTEM("_system"), SOC("_soc"), DEVICE(
+            "_device"
+        );
     }
 
-    object ChannelName {
-        const val METHOD_CHANNEL_NAME: String = "com.example.spu_z_copy_method_channel"
-        const val EVENT_CHANNEL_NAME: String = "com.example.spu_z_copy_event_channel"
+    enum class Channel(val title: String) {
+        METHOD_CHANNEL_NAME("com.example.spu_z_copy_method_channel"),
+        EVENT_CHANNEL_NAME("com.example.spu_z_copy_event_channel");
     }
 
 }

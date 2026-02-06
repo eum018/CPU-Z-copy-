@@ -24,15 +24,17 @@ class Battery(context: Context) {
                     val temperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, 0) / 10
                     val powerSource = getPowerSource(intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1))
                     val voltage = intent.getIntExtra(BatteryManager.EXTRA_VOLTAGE, 0)
+                    val technology = intent.getStringExtra(BatteryManager.EXTRA_TECHNOLOGY) ?: "error"
 
                     val result = mapOf<String, Any>(
                         "type" to "battery",
                         "health" to health,
                         "status" to status,
                         "level" to level,
+                        "technology" to technology,
                         "temperature" to temperature,
                         "powerSource" to powerSource,
-                        "valtage" to voltage
+                        "voltage" to voltage
                     )
                     events.success(result)
                 }
@@ -73,11 +75,11 @@ class Battery(context: Context) {
 
     fun getPowerSource(status: Int): String {
         return when (status) {
-            BatteryManager.BATTERY_PLUGGED_AC -> "ac"
-            BatteryManager.BATTERY_PLUGGED_USB -> "usb"
-            BatteryManager.BATTERY_PLUGGED_DOCK -> "dock"
-            BatteryManager.BATTERY_PLUGGED_WIRELESS -> "wireless"
-            else -> "battery"
+            BatteryManager.BATTERY_PLUGGED_AC -> "Ac"
+            BatteryManager.BATTERY_PLUGGED_USB -> "Usb"
+            BatteryManager.BATTERY_PLUGGED_DOCK -> "Dock"
+            BatteryManager.BATTERY_PLUGGED_WIRELESS -> "Wireless"
+            else -> "Battery"
         }
     }
 

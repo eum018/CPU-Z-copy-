@@ -1,10 +1,10 @@
-import 'dart:io';
-
 import 'package:cpu_z_copy/controller/battery_controller.dart';
+import 'package:cpu_z_copy/controller/device_controller.dart';
 import 'package:cpu_z_copy/controller/sensor_contollrer.dart';
 import 'package:cpu_z_copy/main.dart';
 import 'package:cpu_z_copy/widget/info_item.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class SOC extends StatelessWidget {
   SOC({super.key});
@@ -22,11 +22,10 @@ class SOC extends StatelessWidget {
           InfoItem(title: 'Clock Speed', infos: ['dfagdsfg']),
           ...List.generate(
             8,
-                (index) =>
-                Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: InfoItem(title: 'CPU $index', infos: ['ddfg']),
-                ),
+            (index) => Padding(
+              padding: const EdgeInsets.only(left: 12),
+              child: InfoItem(title: 'CPU $index', infos: ['ddfg']),
+            ),
           ),
           InfoItem(title: 'GPU Load', infos: ['%']),
           InfoItem(title: 'Scaling Governor', infos: ['dfsgdf']),
@@ -36,25 +35,96 @@ class SOC extends StatelessWidget {
   }
 }
 
-class Device extends StatelessWidget {
+class Device extends StatefulWidget {
   const Device({super.key});
 
   @override
+  State<Device> createState() => _DeviceState();
+}
+
+class _DeviceState extends State<Device> {
+  late DeviceController _deviceController;
+
+  @override
+  void initState() {
+    _deviceController = DeviceController();
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _deviceController.init();
+    });
+  }
+
+  @override
+  void dispose() {
+    _deviceController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        InfoItem(title: 'Model', infos: ['dd']),
-        InfoItem(title: 'Manufacturer', infos: ['dd']),
-        InfoItem(title: 'Board', infos: ['dd']),
-        InfoItem(title: 'Hardware', infos: ['dd']),
-        InfoItem(title: 'Screen Size', infos: ['dd']),
-        InfoItem(title: 'Screen Resolution', infos: ['dd']),
-        InfoItem(title: 'Screen Density', infos: ['dd']),
-        InfoItem(title: 'Total RAM', infos: ['dd']),
-        InfoItem(title: 'Available', infos: ['dd']),
-        InfoItem(title: 'Internal Storage', infos: ['dd']),
-        InfoItem(title: 'Available Storage', infos: ['dd']),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: _deviceController.updateCount,
+      builder: (context, value, child) {
+        return Column(
+          children: [
+            InfoItem(title: 'Model', infos: [_deviceController.model]),
+            InfoItem(
+              title: 'Manufacturer',
+              infos: [_deviceController.manufacturer],
+            ),
+            InfoItem(title: 'Board', infos: [_deviceController.board]),
+            InfoItem(title: 'Hardware', infos: [_deviceController.hardware]),
+            InfoItem(
+              title: 'Screen Size',
+              infos: [
+                Global.floatDot2.format(_deviceController.screenSize) +
+                    " inches",
+              ],
+            ),
+            InfoItem(
+              title: 'Screen Resolution',
+              infos: [_deviceController.screenResolution],
+            ),
+            InfoItem(
+              title: 'Screen Density',
+              infos: ["${_deviceController.screenDensity}" + " dpi"],
+            ),
+            InfoItem(
+              title: 'Total RAM',
+              infos: [
+                Global.floatDot2.format(_deviceController.totalRam / 1e6) +
+                    " MB",
+              ],
+            ),
+            InfoItem(
+              title: 'Available',
+              infos: [
+                Global.floatDot2.format(_deviceController.availableRam / 1e6) +
+                    " MB",
+              ],
+            ),
+            InfoItem(
+              title: 'Internal Storage',
+              infos: [
+                Global.floatDot2.format(
+                      _deviceController.internalStorage / 1e6,
+                    ) +
+                    " MB",
+              ],
+            ),
+            InfoItem(
+              title: 'Available Storage',
+              infos: [
+                Global.floatDot2.format(
+                      _deviceController.availableStorage / 1e9,
+                    ) +
+                    " GB",
+              ],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -95,33 +165,47 @@ class _BatteryState extends State<Battery> {
   @override
   void initState() {
     _batteryController = BatteryController();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _batteryController.init();
-    });
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _batteryController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-        valueListenable: _batteryController.updateCount,
-        builder: (context, value, child) {
-          return Column(
-            children: [
-              InfoItem(title: 'Health', infos: [_batteryController.health]),
-              InfoItem(title: 'Level', infos: ['${_batteryController.level}']),
-              InfoItem(title: 'Power Source',
-                  infos: [_batteryController.PowerSource]),
-              InfoItem(
-                  title: 'Technology', infos: [_batteryController.Technology]),
-              InfoItem(title: 'Temperature',
-                  infos: ['${_batteryController.Temperature}']),
-              InfoItem(
-                  title: 'Voltage', infos: ['${_batteryController.Voltage}']),
-            ],
-          );
-        }
+      valueListenable: _batteryController.updateCount,
+      builder: (context, value, child) {
+        return Column(
+          children: [
+            InfoItem(title: 'Health', infos: [_batteryController.health]),
+            InfoItem(title: 'Level', infos: ['${_batteryController.level} %']),
+            InfoItem(
+              title: 'Power Source',
+              infos: [_batteryController.PowerSource],
+            ),
+            InfoItem(
+              title: 'Status',
+              infos: [_batteryController.status],
+            ),
+            InfoItem(
+              title: 'Technology',
+              infos: [_batteryController.Technology],
+            ),
+            InfoItem(
+              title: 'Temperature',
+              infos: ['${_batteryController.Temperature} °C'],
+            ),
+            InfoItem(
+              title: 'Voltage',
+              infos: ['${_batteryController.Voltage} mV'],
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -149,89 +233,43 @@ class Sensors extends StatefulWidget {
 }
 
 class _SensorsState extends State<Sensors> {
-
   late SensorController _sensorController;
-
 
   @override
   void initState() {
     _sensorController = SensorController();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _sensorController.init();
-    },);
-
-
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _sensorController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
+    return ValueListenableBuilder(
+      valueListenable: _sensorController.updateCount,
+      builder: (context, value, child) {
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              ...List.generate(
+                _sensorController.sensorList.length,
+                (index) => SensorItem(
+                  title: _sensorController.sensorList[index].name,
+                  info: SensorController.getSensorInfo(
+                    _sensorController.sensorList[index],
+                  ),
+                ),
+              ),
 
-          ...List.generate(_sensorController.sensorList.length, (index) =>
-              SensorItem(
-                  title: _sensorController.sensorList[index], info: ''),),
-
-          SizedBox(height: 100,),
-
-
-          SensorItem(title: 'LSM6DSO Accelerometer', info: ''),
-          SensorItem(title: 'AK09918 Magnetometer', info: ''),
-          SensorItem(title: 'LSM6DSO Gyroscope', info: ''),
-          SensorItem(
-            title: 'TMD4907 Light Ambient Light Sensor Non-wakeup',
-            info: '',
+              SizedBox(height: 100),
+            ],
           ),
-          SensorItem(title: 'Ips22hh Pressure Sensor Non-wakeup', info: ''),
-          SensorItem(title: 'gravity Non-wakeup', info: ''),
-          SensorItem(title: 'linear_acceleration', info: ''),
-          SensorItem(title: 'Rotation Vector Non-wakeup', info: ''),
-          SensorItem(title: 'AL09918 Magnetometer', info: ''),
-          SensorItem(title: 'Game Rotation Vector Non-wakeup', info: ''),
-          SensorItem(title: 'Rotation Vector Non-wakeup', info: ''),
-          SensorItem(title: 'LSM6DSO Gyroscope-Uncalibrated', info: ''),
-          SensorItem(title: 'sdm Wakeup', info: ''),
-          SensorItem(title: 'step_detector Non-wakeup', info: ''),
-          SensorItem(title: 'step_counter Non-wakeup', info: ''),
-          SensorItem(title: 'Tilt Detector Wakeup', info: ''),
-          SensorItem(title: 'Pick Up Gesture Wakeup', info: ''),
-          SensorItem(title: 'Screen Orientation Sensor', info: ''),
-          SensorItem(title: 'motion_detect', info: ''),
-          SensorItem(title: 'LSM6DSO Accelerometer_Uncalibrated', info: ''),
-          SensorItem(title: 'WideIR ALS', info: ''),
-          SensorItem(title: 'interrupt_gyro Non-wakeup', info: ''),
-          SensorItem(title: 'Proximity strm', info: ''),
-          SensorItem(title: 'SensorHub type', info: ''),
-          SensorItem(title: 'TMD4907 Light CCT Non-wakeup', info: ''),
-          SensorItem(title: 'Wake Up Motion Wakeup', info: ''),
-          SensorItem(
-            title: 'TMD4907 Proximity Proximity Sensor Wakeup',
-            info: '',
-          ),
-          SensorItem(title: 'call_gesture Wakeup', info: ''),
-          SensorItem(
-            title: 'TMD4907 Light Auto Brightness Non-wakeup',
-            info: '',
-          ),
-          SensorItem(title: 'Pocket mode Wakeup', info: ''),
-          SensorItem(title: 'Led Cover Event Wakeup', info: ''),
-          SensorItem(title: 'Shake to Share Wakeup', info: ''),
-          SensorItem(title: 'Sar BackOff Motion Wakeup', info: ''),
-          SensorItem(title: 'Pocket Position Mode Wakeup', info: ''),
-          SensorItem(title: 'SX9360 Grip sensor', info: ''),
-          SensorItem(title: 'Touch Proximity Sensor', info: ''),
-          SensorItem(title: 'Hall IC', info: ''),
-          SensorItem(title: 'TCS3407 Rear ALS', info: ''),
-          SensorItem(title: 'Palm Proximity Sensor version 2', info: ''),
-          SensorItem(title: 'Motion Sensor', info: ''),
-          SensorItem(title: 'Orientation Sensor', info: ''),
-          //Wake Up Motion WakeUp
-        ],
-      ),
+        );
+      },
     );
   }
 }
