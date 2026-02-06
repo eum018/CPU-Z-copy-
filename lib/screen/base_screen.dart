@@ -34,7 +34,7 @@ class BaseScreen extends StatelessWidget {
   final PageController _pageController = PageController();
   final GlobalKey _tapListKey = GlobalKey();
 
-  void moveTo(int value) { _curIndex.value = value;}
+  void moveTo(int value) {_curIndex.value = value; _pageController.jumpToPage(value);}
 
   double? screen;
 
@@ -44,7 +44,7 @@ class BaseScreen extends StatelessWidget {
     screen = MediaQuery.of(context).size.height;
     return DefaultLayout(appBar: TopBar(), child: Column(children: [
 
-      tapList(),
+      _tapList(),
 
       Expanded(
         child: PageView.builder(
@@ -61,16 +61,16 @@ class BaseScreen extends StatelessWidget {
   }
 
 
-  Widget tapList () {
+  Widget _tapList () {
     return SingleChildScrollView(scrollDirection:.horizontal, controller: _scrollController,
         child: ValueListenableBuilder(valueListenable: _curIndex,
             builder: (_, value, _) => Row(key: _tapListKey, children: List.generate(keyList.length,
-                      (index) => tap(keyList[index], index)),)
+                      (index) => _tap(keyList[index], index)),)
             ));
   }
 
 
-  Widget tap (String text, int index) {
+  Widget _tap (String text, int index) {
     final bool isCurIndex = _curIndex.value == index;
     return InkWell(
       onTap: () {moveTo(index);},
