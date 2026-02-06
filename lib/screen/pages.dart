@@ -1,6 +1,7 @@
 import 'package:cpu_z_copy/controller/battery_controller.dart';
 import 'package:cpu_z_copy/controller/device_controller.dart';
 import 'package:cpu_z_copy/controller/sensor_contollrer.dart';
+import 'package:cpu_z_copy/controller/system_controller.dart';
 import 'package:cpu_z_copy/main.dart';
 import 'package:cpu_z_copy/widget/info_item.dart';
 import 'package:flutter/material.dart';
@@ -129,25 +130,49 @@ class _DeviceState extends State<Device> {
   }
 }
 
-class System extends StatelessWidget {
+class System extends StatefulWidget {
   const System({super.key});
 
   @override
+  State<System> createState() => _SystemState();
+}
+
+class _SystemState extends State<System> {
+  late SystemController _systemController;
+
+  @override
+  void initState() {
+    _systemController = SystemController();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      _systemController.init();
+    });
+
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        InfoItem(title: 'Android Version', infos: ['']),
-        InfoItem(title: 'API Level', infos: ['']),
-        InfoItem(title: 'Security Patch Level', infos: ['']),
-        InfoItem(title: 'Bootloader', infos: ['']),
-        InfoItem(title: 'Build ID', infos: ['']),
-        InfoItem(title: 'Java VM', infos: ['']),
-        InfoItem(title: 'Kernel Architecture', infos: ['']),
-        InfoItem(title: 'Kernel Version', infos: ['']),
-        InfoItem(title: 'Root Access', infos: ['']),
-        InfoItem(title: 'Google Play Services', infos: ['']),
-        InfoItem(title: 'System Uptime', infos: ['']),
-      ],
+    return ValueListenableBuilder(
+      valueListenable: _systemController.updateCount,
+      builder: (context, value, child) {
+        return Column(
+          children: [
+            InfoItem(title: 'Android Version', infos: [_systemController.androidVersion]),
+            InfoItem(title: 'API Level', infos: ["${_systemController.apiVersion}"]),
+            InfoItem(title: 'Security Patch Level', infos: [_systemController.securityPatchLevel]),
+            InfoItem(title: 'Bootloader', infos: [_systemController.bootLoader]),
+            InfoItem(title: 'Build ID', infos: [_systemController.buildId]),
+            InfoItem(title: 'Java VM', infos: [_systemController.javaVmVer]),
+            InfoItem(title: 'OpenGl ES', infos: [_systemController.openGLVer]),
+            InfoItem(title: 'Kernel Architecture', infos: [_systemController.kernelArch]),
+            InfoItem(title: 'Kernel Version', infos: [_systemController.kernelVer]),
+            InfoItem(title: 'Root Access', infos: [_systemController.rootAccess]),
+            InfoItem(title: 'Google Play Services', infos: [_systemController.googlePlayService]),
+            InfoItem(title: 'System Uptime', infos: ["${_systemController.systemMethodPlatform}"]),
+          ],
+        );
+      }
     );
   }
 }
@@ -187,10 +212,7 @@ class _BatteryState extends State<Battery> {
               title: 'Power Source',
               infos: [_batteryController.PowerSource],
             ),
-            InfoItem(
-              title: 'Status',
-              infos: [_batteryController.status],
-            ),
+            InfoItem(title: 'Status', infos: [_batteryController.status]),
             InfoItem(
               title: 'Technology',
               infos: [_batteryController.Technology],
