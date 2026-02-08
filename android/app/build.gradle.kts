@@ -5,18 +5,18 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+extra["code"] = 1
+extra["name"] = "1.0.0"
+
+
 android {
     namespace = "com.example.cpu_z_copy"
-    compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    compileSdk = 35
+    ndkVersion = "25.2.9519653"
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-    }
-
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
     }
 
     defaultConfig {
@@ -24,10 +24,10 @@ android {
         applicationId = "com.example.cpu_z_copy"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        minSdk = 25
+        targetSdk = 35
+        versionCode = extra["code"] as Int
+        versionName = extra["name"] as String
     }
 
     buildTypes {
@@ -36,6 +36,9 @@ android {
             // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
+    }
+    kotlinOptions {
+        jvmTarget = "17"
     }
 }
 
