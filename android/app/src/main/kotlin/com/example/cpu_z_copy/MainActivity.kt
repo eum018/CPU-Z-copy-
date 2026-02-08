@@ -28,6 +28,11 @@ class MainActivity : FlutterActivity() {
             Channel.METHOD_CHANNEL_NAME.title + RequestApp.DEVICE.title
         ).setMethodCallHandler(Device(context).handler)
 
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            Channel.METHOD_CHANNEL_NAME.title + RequestApp.SYSTEM.title
+        ).setMethodCallHandler(System(context).handler)
+
 
     }
 
