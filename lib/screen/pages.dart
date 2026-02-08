@@ -143,12 +143,22 @@ class _SystemState extends State<System> {
   @override
   void initState() {
     _systemController = SystemController();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _systemController.init();
     });
-
     super.initState();
+  }
+
+  String durationFormat(Duration d) {
+    final days = d.inDays;
+    final hours = d.inHours % 24;
+    final minutes = d.inMinutes % 60;
+    final seconds = d.inSeconds % 60;
+
+    return '${days.toString()}. '
+        '${hours.toString()}:'
+        '${minutes.toString()}:'
+        '${seconds.toString()}';
   }
 
   @override
@@ -158,21 +168,51 @@ class _SystemState extends State<System> {
       builder: (context, value, child) {
         return Column(
           children: [
-            InfoItem(title: 'Android Version', infos: [_systemController.androidVersion]),
-            InfoItem(title: 'API Level', infos: ["${_systemController.apiVersion}"]),
-            InfoItem(title: 'Security Patch Level', infos: [_systemController.securityPatchLevel]),
-            InfoItem(title: 'Bootloader', infos: [_systemController.bootLoader]),
+            InfoItem(
+              title: 'Android Version',
+              infos: [_systemController.androidVersion],
+            ),
+            InfoItem(
+              title: 'API Level',
+              infos: ["${_systemController.apiVersion}"],
+            ),
+            InfoItem(
+              title: 'Security Patch Level',
+              infos: [_systemController.spl],
+            ),
+            InfoItem(
+              title: 'Bootloader',
+              infos: [_systemController.bootLoader],
+            ),
             InfoItem(title: 'Build ID', infos: [_systemController.buildId]),
-            InfoItem(title: 'Java VM', infos: [_systemController.javaVmVer]),
-            InfoItem(title: 'OpenGl ES', infos: [_systemController.openGLVer]),
-            InfoItem(title: 'Kernel Architecture', infos: [_systemController.kernelArch]),
-            InfoItem(title: 'Kernel Version', infos: [_systemController.kernelVer]),
-            InfoItem(title: 'Root Access', infos: [_systemController.rootAccess]),
-            InfoItem(title: 'Google Play Services', infos: [_systemController.googlePlayService]),
-            InfoItem(title: 'System Uptime', infos: ["${_systemController.systemMethodPlatform}"]),
+            InfoItem(title: 'Java VM', infos: [_systemController.javaVm]),
+            InfoItem(
+              title: 'OpenGL Version',
+              infos: [_systemController.openGLVersion],
+            ),
+            InfoItem(
+              title: 'Kernel Architecture',
+              infos: [_systemController.kernelArch],
+            ),
+            InfoItem(
+              title: 'Kernel Version',
+              infos: [_systemController.kernelVersion],
+            ),
+            InfoItem(
+              title: 'Root Access',
+              infos: [_systemController.rootAccess ? "Yes" : "No"],
+            ),
+            InfoItem(
+              title: 'Google Play Services',
+              infos: [_systemController.gps],
+            ),
+            InfoItem(
+              title: 'System Uptime',
+              infos: [durationFormat(_systemController.uptime)],
+            ),
           ],
         );
-      }
+      },
     );
   }
 }

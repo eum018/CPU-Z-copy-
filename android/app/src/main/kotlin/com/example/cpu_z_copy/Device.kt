@@ -17,54 +17,46 @@ class Device(context: Context) {
 
     val handler = object : MethodChannel.MethodCallHandler {
         override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
-            val resultData = when (call.method) {
-                DeviceRequest.MANUFACTURER.title -> resultDataPut(Build.MANUFACTURER)
-                DeviceRequest.HARDWARE.title -> resultDataPut(Build.HARDWARE)
-                DeviceRequest.BOARD.title -> resultDataPut(Build.BOARD)
-                DeviceRequest.MODEL.title -> resultDataPut(Build.MODEL)
-                DeviceRequest.SCREEN.title -> {
-                    val wInch = metrics.widthPixels / metrics.xdpi
-                    val hInch = metrics.heightPixels / metrics.ydpi
-                    val size = sqrt(wInch.pow(2) + hInch.pow(2))
-                    resultDataPut(
+            val resultData = mapOf(
+                "type" to "device",
+                "content" to when (call.method) {
+                    DeviceRequest.MANUFACTURER.title -> Build.MANUFACTURER
+                    DeviceRequest.HARDWARE.title -> Build.HARDWARE
+                    DeviceRequest.BOARD.title -> Build.BOARD
+                    DeviceRequest.MODEL.title -> Build.MODEL
+                    DeviceRequest.SCREEN.title -> {
+                        val wInch = metrics.widthPixels / metrics.xdpi
+                        val hInch = metrics.heightPixels / metrics.ydpi
+                        val size = sqrt(wInch.pow(2) + hInch.pow(2))
                         mapOf(
                             "size" to size,
                             "resolution" to "${metrics.heightPixels} x ${metrics.widthPixels} pixels",
                             "density" to metrics.densityDpi,
                         )
-                    )
-                }
+                    }
 
-                DeviceRequest.RAM.title -> resultDataPut(
-                    mapOf(
+                    DeviceRequest.RAM.title -> mapOf(
                         "total" to runtime.totalMemory(),
                         "available" to runtime.freeMemory()
                     )
-                )
 
-                DeviceRequest.STORAGE.title -> {
-                    var size = storageStat.blockSizeLong
-                    var total = size * storageStat.blockCountLong
-                    resultDataPut(
+                    DeviceRequest.STORAGE.title -> {
+                        var size = storageStat.blockSizeLong
+                        var total = size * storageStat.blockCountLong
                         mapOf(
                             "total" to total,
                             "available" to total - (size * storageStat.availableBlocksLong)
                         )
-                    )
-                }
+                    }
 
-                else -> result.notImplemented()
-            }
+                    else -> {
+                        result.notImplemented()
+                        return
+                    }
+                }
+            )
 
             result.success(resultData)
-        }
-
-        fun resultDataPut(content: Any): Map<String, Any> {
-            var result = mapOf<String, Any>(
-                "type" to "device",
-                "content" to content,
-            )
-            return result
         }
     }
 

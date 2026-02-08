@@ -6,6 +6,11 @@ abstract class BaseController {
 
   void updateScreen() => updateCount.value = updateCount.value + 1;
 
+  Map<String, dynamic> asMap (Map map) {
+    return Map<String, dynamic>.from(map);
+  }
+
+
 }
 
 
@@ -19,7 +24,4 @@ mixin Channel {
   late final deviceMethodPlatform = MethodChannel(_baseMethodChannelName + '_device');
   late final systemMethodPlatform = MethodChannel(_baseMethodChannelName + '_system');
 
-  Map<String, dynamic> asMap (Map map) {
-    return Map<String, dynamic>.from(map);
-  }
 }

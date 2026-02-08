@@ -38,6 +38,14 @@ class DeviceController extends BaseController with Channel {
       screenResolution = asMap(asMap(value)['content'])['resolution'];
       screenDensity = asMap(asMap(value)['content'])['density'];
     });
+    await deviceMethodPlatform.invokeMethod('ram').then((value) {
+      totalRam = asMap(asMap(value)['content'])['total'];
+      availableRam = asMap(asMap(value)['content'])['available'];
+    });
+    await deviceMethodPlatform.invokeMethod('storage').then((value) {
+      internalStorage = asMap(asMap(value)['content'])['total'];
+      availableStorage = asMap(asMap(value)['content'])['available'];
+    });
     updateScreen();
   }
 
@@ -53,7 +61,6 @@ class DeviceController extends BaseController with Channel {
         internalStorage = asMap(asMap(value)['content'])['total'];
         availableStorage = asMap(asMap(value)['content'])['available'];
       });
-
       updateScreen();
     });
   }
